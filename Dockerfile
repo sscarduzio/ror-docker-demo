@@ -1,7 +1,7 @@
 FROM ubuntu:18.04
 
 ENV ES_MAJOR_VERSION=6.x
-ENV ES_VERSION=6.6.1
+ENV ES_VERSION=6.7.1
 ENV ROR_VERSION=1.17.6
 ENV DEBIAN_FRONTEND noninteractive
 
@@ -32,10 +32,10 @@ RUN echo "deb https://artifacts.elastic.co/packages/${ES_MAJOR_VERSION}/apt stab
 RUN apt-get update && apt-get install -y elasticsearch=${ES_VERSION}
 
 # Install the ingest-geoip plugin for elasticsearch
-RUN /usr/share/elasticsearch/bin/elasticsearch-plugin install --batch ingest-geoip
+#RUN /usr/share/elasticsearch/bin/elasticsearch-plugin install --batch ingest-geoip
 
 # Install the ingest-user-agent plugin for elasticsearch
-RUN /usr/share/elasticsearch/bin/elasticsearch-plugin install --batch ingest-user-agent
+#RUN /usr/share/elasticsearch/bin/elasticsearch-plugin install --batch ingest-user-agent
 
 # Install Kibana
 RUN apt-get update && apt-get install -y kibana=${ES_VERSION}
