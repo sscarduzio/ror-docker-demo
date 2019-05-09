@@ -62,7 +62,7 @@ elasticsearch.password: "kibana"
 #elasticsearch.ssl.certificateAuthorities: [ "/path/to/your/CA.pem" ]
 
 # To disregard the validity of SSL certificates, change this setting's value to 'none'.
-#elasticsearch.ssl.verificationMode: full
+elasticsearch.ssl.verificationMode: none
 
 # Time in milliseconds to wait for Elasticsearch to respond to pings. Defaults to the value of
 # the elasticsearch.requestTimeout setting.
@@ -114,9 +114,9 @@ elasticsearch.password: "kibana"
 
 # RoR
 xpack.security.enabled: false
-xpack.spaces.enabled: false
-xpack.reporting.enabled: false
-xpack.monitoring.enabled: false
-xpack.ml.enabled: false
-xpack.infra.enabled: false
-xpack.apm.enabled: false
+#xpack.spaces.enabled: false
+#xpack.reporting.enabled: false
+#xpack.monitoring.enabled: false
+#xpack.ml.enabled: false
+#xpack.infra.enabled: false
+#xpack.apm.enabled: false

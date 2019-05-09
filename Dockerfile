@@ -1,7 +1,7 @@
 FROM ubuntu:18.04
 
-ENV ES_MAJOR_VERSION=6.x
-ENV ES_VERSION=6.7.1
+ENV ES_MAJOR_VERSION=7.x
+ENV ES_VERSION=7.0.0
 ENV ROR_VERSION=1.17.6
 ENV DEBIAN_FRONTEND noninteractive
 
@@ -66,7 +66,7 @@ COPY config/elasticsearch/readonlyrest.yml /etc/elasticsearch/readonlyrest.yml
 
 # Install RoR Plugins
 RUN /usr/share/elasticsearch/bin/elasticsearch-plugin install -b file:///pkg/readonlyrest-${ROR_VERSION}_es${ES_VERSION}.zip
-RUN /usr/share/kibana/bin/kibana-plugin install --quiet --no-optimize file:///pkg/readonlyrest_kbn_enterprise-${ROR_VERSION}_es${ES_VERSION}.zip
+RUN /usr/share/kibana/bin/kibana-plugin install --quiet  file:///pkg/readonlyrest_kbn_enterprise-${ROR_VERSION}_es${ES_VERSION}.zip
 
 # Speed up the optimisation
 RUN touch /usr/share/kibana/optimize/bundles/readonlyrest_kbn.style.css

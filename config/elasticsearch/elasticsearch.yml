@@ -1,3 +1,4 @@
+
 # ======================== Elasticsearch Configuration =========================
 #
 # NOTE: Elasticsearch comes with reasonable defaults for most settings.
@@ -14,13 +15,9 @@
 #
 # Use a descriptive name for your cluster:
 #
+node.name: n1_it
+cluster.initial_master_nodes: n1_it
 cluster.name: es-all-in-one
-#
-# ------------------------------------ Node ------------------------------------
-#
-# Use a descriptive name for the node:
-#
-node.name: es-all-one-1
 #
 # Add custom attributes to the node:
 #
@@ -87,7 +84,7 @@ network.host: _local_,_site_
 #
 #action.destructive_requires_name: true
 xpack.security.enabled: false
-xpack.monitoring.enabled: false
-xpack.watcher.enabled: false
-xpack.ml.enabled: false
-xpack.graph.enabled: false
+#xpack.monitoring.enabled: false
+#xpack.watcher.enabled: false
+#xpack.ml.enabled: false
+#xpack.graph.enabled: false
