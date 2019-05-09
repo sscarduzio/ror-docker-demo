@@ -62,7 +62,7 @@ elasticsearch.password: "kibana"
 #elasticsearch.ssl.certificateAuthorities: [ "/path/to/your/CA.pem" ]
 
 # To disregard the validity of SSL certificates, change this setting's value to 'none'.
-elasticsearch.ssl.verificationMode: none
+#elasticsearch.ssl.verificationMode: none
 
 # Time in milliseconds to wait for Elasticsearch to respond to pings. Defaults to the value of
 # the elasticsearch.requestTimeout setting.
