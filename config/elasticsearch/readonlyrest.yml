@@ -8,15 +8,13 @@ readonlyrest:
   # kibana:kibana
   - name: "::KIBANA::"
     auth_key_sha256: "ab8aa94dd63debfa31ef8a9eae9582dcb252c06cdb6313e123546cc8edfeaf3e"
-    actions: ["*"]
-    indices: ["*"]
+    verbosity: error
 
   - name: "Admin"
     groups: ["useradmin"]
     kibana_access: admin
     kibana_index: ".kibana_useradmin"
-    actions: ["*"]
-    indices: ["*"]
+    verbosity: error
 
   users:
   # admin:admin
