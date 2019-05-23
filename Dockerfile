@@ -1,8 +1,8 @@
 FROM ubuntu:18.04
 
 ENV ES_MAJOR_VERSION=7.x
-ENV ES_VERSION=7.0.0
-ENV ROR_VERSION=1.17.6
+ENV ES_VERSION=7.0.1
+ENV ROR_VERSION=1.18.0
 ENV DEBIAN_FRONTEND noninteractive
 
 # Install dependencies
@@ -65,8 +65,10 @@ COPY pkg/ /pkg
 COPY config/elasticsearch/readonlyrest.yml /etc/elasticsearch/readonlyrest.yml
 
 # Install RoR Plugins
-RUN /usr/share/elasticsearch/bin/elasticsearch-plugin install -b file:///pkg/readonlyrest-${ROR_VERSION}_es${ES_VERSION}.zip
-RUN /usr/share/kibana/bin/kibana-plugin install --quiet  file:///pkg/readonlyrest_kbn_enterprise-${ROR_VERSION}_es${ES_VERSION}.zip
+
+RUN echo "ror version is: ${ROR_VERSION}"
+RUN /usr/share/kibana/bin/kibana-plugin install "https://m0ppfybs81.execute-api.eu-west-1.amazonaws.com/dev/download/trial?esVersion=${ES_VERSION}&pluginVersion=${ROR_VERSION}"
+RUN /usr/share/elasticsearch/bin/elasticsearch-plugin install -b "https://m0ppfybs81.execute-api.eu-west-1.amazonaws.com/dev/download/es?esVersion=${ES_VERSION}&pluginVersion=${ROR_VERSION}"
 RUN /usr/share/kibana/bin/kibana --optimize 
 
 # Speed up the optimisation
