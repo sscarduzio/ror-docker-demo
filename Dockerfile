@@ -58,9 +58,6 @@ COPY config/kibana/kibana.yml /etc/kibana/kibana.yml
 # Configure Filebeat
 COPY config/filebeat/filebeat.yml /etc/filebeat/filebeat.yml
 
-# Copy the RoR packages
-COPY pkg/ /pkg
-
 # Copy the RoR configuration
 COPY config/elasticsearch/readonlyrest.yml /etc/elasticsearch/readonlyrest.yml
 
