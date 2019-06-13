@@ -49,11 +49,22 @@ RUN apt-get install -y rsyslog
 # Enable filebeat modules
 RUN filebeat modules list | sed -n '1,/Disabled:/!p' | xargs filebeat modules enable
 
-# Configure Elasticsearch
-COPY config/elasticsearch/elasticsearch.yml /etc/elasticsearch/elasticsearch.yml
+# Install RoR Plugins
+
+RUN echo "ror version is: ${ROR_VERSION}"
+RUN /usr/share/kibana/bin/kibana-plugin install "https://m0ppfybs81.execute-api.eu-west-1.amazonaws.com/dev/download/trial?esVersion=${ES_VERSION}&pluginVersion=${ROR_VERSION}"
+RUN /usr/share/elasticsearch/bin/elasticsearch-plugin install -b "https://m0ppfybs81.execute-api.eu-west-1.amazonaws.com/dev/download/es?esVersion=${ES_VERSION}&pluginVersion=${ROR_VERSION}"
 
 # Configure Kibana
 COPY config/kibana/kibana.yml /etc/kibana/kibana.yml
+
+RUN /usr/share/kibana/bin/kibana --optimize 
+
+# Speed up the optimisation
+RUN touch /usr/share/kibana/optimize/bundles/readonlyrest_kbn.style.css
+
+# Configure Elasticsearch
+COPY config/elasticsearch/elasticsearch.yml /etc/elasticsearch/elasticsearch.yml
 
 # Configure Filebeat
 COPY config/filebeat/filebeat.yml /etc/filebeat/filebeat.yml
@@ -61,15 +72,7 @@ COPY config/filebeat/filebeat.yml /etc/filebeat/filebeat.yml
 # Copy the RoR configuration
 COPY config/elasticsearch/readonlyrest.yml /etc/elasticsearch/readonlyrest.yml
 
-# Install RoR Plugins
 
-RUN echo "ror version is: ${ROR_VERSION}"
-RUN /usr/share/kibana/bin/kibana-plugin install "https://m0ppfybs81.execute-api.eu-west-1.amazonaws.com/dev/download/trial?esVersion=${ES_VERSION}&pluginVersion=${ROR_VERSION}"
-RUN /usr/share/elasticsearch/bin/elasticsearch-plugin install -b "https://m0ppfybs81.execute-api.eu-west-1.amazonaws.com/dev/download/es?esVersion=${ES_VERSION}&pluginVersion=${ROR_VERSION}"
-RUN /usr/share/kibana/bin/kibana --optimize 
-
-# Speed up the optimisation
-RUN touch /usr/share/kibana/optimize/bundles/readonlyrest_kbn.style.css
 
 # Copy the supervisord initscripts
 COPY supervisord/ /etc/supervisor/conf.d/
