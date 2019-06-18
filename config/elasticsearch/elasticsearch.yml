@@ -16,7 +16,11 @@
 # Use a descriptive name for your cluster:
 #
 node.name: n1_it
+#
+# COMMENT OUT FOR ES < 7.x
 cluster.initial_master_nodes: n1_it
+#
+#
 cluster.name: es-all-in-one
 #
 # Add custom attributes to the node:

@@ -1,23 +1,16 @@
 readonlyrest:
 
-  # IMPORTANT FOR LOGIN/LOGOUT TO WORK
   prompt_for_basic_auth: false
 
   access_control_rules:
 
-  # kibana:kibana
   - name: "::KIBANA::"
-    auth_key_sha256: "ab8aa94dd63debfa31ef8a9eae9582dcb252c06cdb6313e123546cc8edfeaf3e"
+    auth_key: kibana:kibana
     verbosity: error
 
   - name: "Admin"
-    groups: ["useradmin"]
+    auth_key: admin:passwd
     kibana_access: admin
     kibana_index: ".kibana_useradmin"
     verbosity: error
 
-  users:
-  # admin:admin
-  - username: admin
-    auth_key_sha256: "8da193366e1554c08b2870c50f737b9587c3372b656151c4a96028af26f51334"
-    groups: ["useradmin"]
