@@ -1,4 +1,4 @@
-FROM ubuntu:18.04
+FROM ubuntu:19.04
 
 ENV ES_MAJOR_VERSION=7.x
 ENV ES_VERSION=7.1.1
@@ -31,12 +31,6 @@ RUN echo "deb https://artifacts.elastic.co/packages/${ES_MAJOR_VERSION}/apt stab
 # Install Elasticsearch
 RUN apt-get update && apt-get install -y elasticsearch=${ES_VERSION}
 
-# Install the ingest-geoip plugin for elasticsearch
-#RUN /usr/share/elasticsearch/bin/elasticsearch-plugin install --batch ingest-geoip
-
-# Install the ingest-user-agent plugin for elasticsearch
-#RUN /usr/share/elasticsearch/bin/elasticsearch-plugin install --batch ingest-user-agent
-
 # Install Kibana
 RUN apt-get update && apt-get install -y kibana=${ES_VERSION}
 
@@ -56,7 +50,12 @@ RUN /usr/share/kibana/bin/kibana-plugin install "https://m0ppfybs81.execute-api.
 RUN /usr/share/elasticsearch/bin/elasticsearch-plugin install -b "https://m0ppfybs81.execute-api.eu-west-1.amazonaws.com/dev/download/es?esVersion=${ES_VERSION}&pluginVersion=${ROR_VERSION}"
 
 # Configure Kibana
-COPY config/kibana/kibana.yml /etc/kibana/kibana.yml
+RUN echo \
+"server.host: 0.0.0.0\n"\
+"elasticsearch.username: kibana\n"\
+"elasticsearch.password: kibana\n"\
+"xpack.security.enabled: false\n"\
+> /etc/kibana/kibana.yml
 
 RUN /usr/share/kibana/bin/kibana --optimize 
 
@@ -64,18 +63,107 @@ RUN /usr/share/kibana/bin/kibana --optimize
 RUN touch /usr/share/kibana/optimize/bundles/readonlyrest_kbn.style.css
 
 # Configure Elasticsearch
-COPY config/elasticsearch/elasticsearch.yml /etc/elasticsearch/elasticsearch.yml
+RUN echo \
+"node.name: n1_it\n"\
+"cluster.initial_master_nodes: n1_it\n"\
+"cluster.name: es-all-in-one\n"\
+"path.data: /var/lib/elasticsearch\n"\
+"path.logs: /var/log/elasticsearch\n"\
+"network.host: _local_,_site_\n"\
+"xpack.security.enabled: false\n"\
+> /etc/elasticsearch/elasticsearch.yml
 
 # Configure Filebeat
-COPY config/filebeat/filebeat.yml /etc/filebeat/filebeat.yml
+RUN echo \
+"filebeat.inputs:\n"\
+"- type: log\n"\
+"  enabled: false\n"\
+"  paths:\n"\
+"    - /var/log/*.log\n"\
+"filebeat.config.modules:\n"\
+"  path: \${path.config}/modules.d/*.yml\n"\
+"  reload.enabled: false\n"\
+"setup.template.settings:\n"\
+"  index.number_of_shards: 3\n"\
+"setup.kibana:\n"\
+"  host: localhost:5601\n"\
+"  username: kibana\n"\
+"  password: kibana\n"\
+"output.elasticsearch:\n"\
+"  hosts: ['localhost:9200']\n"\
+"  username: kibana\n"\
+"  password: kibana\n"\
+"processors:\n"\
+"  - add_host_metadata: ~\n"\
+"  - add_cloud_metadata: ~\n"\
+> /etc/filebeat/filebeat.yml
 
-# Copy the RoR configuration
-COPY config/elasticsearch/readonlyrest.yml /etc/elasticsearch/readonlyrest.yml
+# RoR configuration
+RUN echo \
+"readonlyrest:\n"\
+"  prompt_for_basic_auth: false\n"\
+"  access_control_rules:\n"\
+"  - name: __KIBANA__\n"\
+"    auth_key: kibana:kibana\n"\
+"    verbosity: error\n"\
+"  - name: Admin\n"\
+"    auth_key: admin:passwd\n"\
+"    kibana_access: admin\n"\
+"    kibana_index: .kibana_useradmin\n"\
+"    verbosity: error\n"\
+ > /etc/elasticsearch/readonlyrest.yml
 
 
 
 # Copy the supervisord initscripts
-COPY supervisord/ /etc/supervisor/conf.d/
+RUN echo \
+"[program:elasticsearch]\n"\
+"user=elasticsearch\n"\
+"command=/usr/share/elasticsearch/bin/elasticsearch -p /var/run/elasticsearch/elasticsearch.pid\n"\
+"autostart=true\n"\
+"autorestart=true\n"\
+"environment=ES_HEAP_SIZE=2g\n"\
+"stdout_logfile=/var/log/supervisor/elasticsearch.out.log\n"\
+"stderr_logfile=/var/log/supervisor/elasticsearch.err.log\n"\
+> /etc/supervisor/conf.d/elasticsearch.conf
+
+
+RUN echo \
+"[program:kibana]\n"\
+"user=kibana\n"\
+"command=/usr/share/kibana/bin/kibana -p /var/run/kibana/kibana.pid\n"\
+"autostart=true\n"\
+"autorestart=true\n"\
+"#environment=ES_HEAP_SIZE=2g\n"\
+"stdout_logfile=/var/log/supervisor/kibana.out.log\n"\
+"stderr_logfile=/var/log/supervisor/kibana.err.log\n"\
+> /etc/supervisor/conf.d/kibana.conf
+
+
+RUN echo \
+"[program:filebeat]\n"\
+"user=root\n"\
+"command=/usr/share/filebeat/bin/filebeat\n"\
+"	-c /etc/filebeat/filebeat.yml\n"\
+"	-path.home /usr/share/filebeat\n"\
+"	-path.config /etc/filebeat\n"\
+"	-path.data /var/lib/filebeat\n"\
+"	-path.logs /var/log/filebeat\n"\
+"autostart=true\n"\
+"autorestart=false\n"\
+"stdout_logfile=/var/log/supervisor/filebeat.out.log\n"\
+"stderr_logfile=/var/log/supervisor/filebeat.err.log\n"\
+> /etc/supervisor/conf.d/filebeat.conf
+
+RUN echo \
+"[program:rsyslog]\n"\
+"user=root\n"\
+"command=/usr/sbin/rsyslogd -n\n"\
+"autostart=true\n"\
+"autorestart=true\n"\
+"stdout_logfile=/var/log/supervisor/rsyslog.out.log\n"\
+"stderr_logfile=/var/log/supervisor/rsyslog.err.log\n"\
+> /etc/supervisor/conf.d/rsyslog.conf
 
 # Open Elasticsearch and Kibana ports
 EXPOSE 9200 5601
