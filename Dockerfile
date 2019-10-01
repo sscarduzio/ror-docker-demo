@@ -1,12 +1,14 @@
 FROM ubuntu:19.04
 
-ENV ES_MAJOR_VERSION=7.x
-ENV ES_VERSION=7.2.0
-ENV ROR_VERSION=1.18.2
+################
+### Preparing OS
+################
+
 ENV DEBIAN_FRONTEND noninteractive
 
 # Install dependencies
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get upgrade -y && apt-get clean -y
+RUN  apt-get install --fix-missing -y && apt-get install -y \
         apt-transport-https \
         apt-utils \
         ca-certificates \
@@ -25,8 +27,18 @@ RUN /var/lib/dpkg/info/ca-certificates-java.postinst configure
 # Add the elasticsearch apt key
 RUN wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | apt-key add -
 
+
+
+####################
+### ELK installation
+####################
+
+ENV ES_MAJOR_VERSION=7.x
+ENV ES_VERSION=7.3.2
+
 # Add the elasticsearch apt repo
 RUN echo "deb https://artifacts.elastic.co/packages/${ES_MAJOR_VERSION}/apt stable main" | tee -a /etc/apt/sources.list.d/elastic-${ES_MAJOR_VERSION}.list
+
 
 # Install Elasticsearch
 RUN apt-get update && apt-get install -y elasticsearch=${ES_VERSION}
@@ -42,21 +54,31 @@ RUN apt-get install -y rsyslog
 
 # Enable filebeat modules
 RUN filebeat modules list | sed -n '1,/Disabled:/!p' | xargs filebeat modules enable
+#######################
+### Install RoR Plugins
+#######################
+
+RUN \
+PUBLISHED_ROR_VERSION=$(curl -s "https://raw.githubusercontent.com/sscarduzio/elasticsearch-readonlyrest-plugin/master/gradle.properties" | grep publi|  awk -F= {'print $2'}) \
+&& echo $PUBLISHED_ROR_VERSION > /tmp/published_ror_version \
+&& echo "ror published version is: ${PUBLISHED_ROR_VERSION} :)" 
+
+RUN KBN_ROR_VERSION=$(cat /tmp/published_ror_version) && echo "ror kbn version $KBN_ROR_VERSION" && \
+/usr/share/kibana/bin/kibana-plugin  --allow-root  install "https://m0ppfybs81.execute-api.eu-west-1.amazonaws.com/dev/download/trial?esVersion=${ES_VERSION}&pluginVersion=${KBN_ROR_VERSION}"
 
 
-# Install RoR Plugins
-
-RUN echo "ror version is: ${ROR_VERSION}"
-RUN /usr/share/kibana/bin/kibana-plugin  --allow-root install "https://m0ppfybs81.execute-api.eu-west-1.amazonaws.com/dev/download/trial?esVersion=${ES_VERSION}&pluginVersion=${ROR_VERSION}"
-RUN /usr/share/elasticsearch/bin/elasticsearch-plugin install -b "https://m0ppfybs81.execute-api.eu-west-1.amazonaws.com/dev/download/es?esVersion=${ES_VERSION}&pluginVersion=${ROR_VERSION}"
+RUN ES_ROR_VERSION=$(cat /tmp/published_ror_version) && echo "ror ES version $KBN_ROR_VERSION" &&\
+/usr/share/elasticsearch/bin/elasticsearch-plugin install -b "https://m0ppfybs81.execute-api.eu-west-1.amazonaws.com/dev/download/es?esVersion=${ES_VERSION}&pluginVersion=${ES_ROR_VERSION}"
 
 # Configure Kibana
 RUN echo \
 "server.host: 0.0.0.0\n"\
+"logging.json: false\n"\
 "elasticsearch.username: kibana\n"\
 "elasticsearch.password: kibana\n"\
 "xpack.security.enabled: false\n"\
 "readonlyrest_kbn.cookiePass: '12345678901234567890123456789012'\n"\
+"readonlyrest_kbn.logLevel: 'debug'\n"\
 > /etc/kibana/kibana.yml
 
 RUN /usr/share/kibana/bin/kibana --allow-root --optimize 
@@ -104,6 +126,7 @@ RUN echo \
 RUN echo \
 "readonlyrest:\n"\
 "  prompt_for_basic_auth: false\n"\
+"  audit_collector: true\n"\
 "  access_control_rules:\n"\
 "   - name: KIBANA_SERVER\n"\
 "     auth_key: kibana:kibana\n"\
