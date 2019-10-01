@@ -46,14 +46,8 @@ RUN apt-get update && apt-get install -y elasticsearch=${ES_VERSION}
 # Install Kibana
 RUN apt-get update && apt-get install -y kibana=${ES_VERSION}
 
-# Install filebeat
-RUN apt-get install -y filebeat=${ES_VERSION}
 
-# Install rsyslog
-RUN apt-get install -y rsyslog
 
-# Enable filebeat modules
-RUN filebeat modules list | sed -n '1,/Disabled:/!p' | xargs filebeat modules enable
 #######################
 ### Install RoR Plugins
 #######################
@@ -96,31 +90,6 @@ RUN echo \
 "network.host: _local_,_site_\n"\
 "xpack.security.enabled: false\n"\
 > /etc/elasticsearch/elasticsearch.yml
-
-# Configure Filebeat
-RUN echo \
-"filebeat.inputs:\n"\
-"- type: log\n"\
-"  enabled: false\n"\
-"  paths:\n"\
-"    - /var/log/*.log\n"\
-"filebeat.config.modules:\n"\
-"  path: \${path.config}/modules.d/*.yml\n"\
-"  reload.enabled: false\n"\
-"setup.template.settings:\n"\
-"  index.number_of_shards: 3\n"\
-"setup.kibana:\n"\
-"  host: localhost:5601\n"\
-"  username: kibana\n"\
-"  password: kibana\n"\
-"output.elasticsearch:\n"\
-"  hosts: ['localhost:9200']\n"\
-"  username: kibana\n"\
-"  password: kibana\n"\
-"processors:\n"\
-"  - add_host_metadata: ~\n"\
-"  - add_cloud_metadata: ~\n"\
-> /etc/filebeat/filebeat.yml
 
 # RoR configuration
 RUN echo \
@@ -185,32 +154,6 @@ RUN echo \
 "stdout_logfile=/var/log/supervisor/kibana.out.log\n"\
 "stderr_logfile=/var/log/supervisor/kibana.err.log\n"\
 > /etc/supervisor/conf.d/kibana.conf
-
-
-RUN echo \
-"[program:filebeat]\n"\
-"user=root\n"\
-"command=/usr/share/filebeat/bin/filebeat\n"\
-"	-c /etc/filebeat/filebeat.yml\n"\
-"	-path.home /usr/share/filebeat\n"\
-"	-path.config /etc/filebeat\n"\
-"	-path.data /var/lib/filebeat\n"\
-"	-path.logs /var/log/filebeat\n"\
-"autostart=true\n"\
-"autorestart=false\n"\
-"stdout_logfile=/var/log/supervisor/filebeat.out.log\n"\
-"stderr_logfile=/var/log/supervisor/filebeat.err.log\n"\
-> /etc/supervisor/conf.d/filebeat.conf
-
-RUN echo \
-"[program:rsyslog]\n"\
-"user=root\n"\
-"command=/usr/sbin/rsyslogd -n\n"\
-"autostart=true\n"\
-"autorestart=true\n"\
-"stdout_logfile=/var/log/supervisor/rsyslog.out.log\n"\
-"stderr_logfile=/var/log/supervisor/rsyslog.err.log\n"\
-> /etc/supervisor/conf.d/rsyslog.conf
 
 
 RUN mkdir /var/run/elasticsearch &&  chown -R elasticsearch /var/run/elasticsearch
