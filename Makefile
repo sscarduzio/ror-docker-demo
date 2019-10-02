@@ -3,8 +3,8 @@ SHELL         := /bin/bash
 PROJECT_NAME  := Elasticstack
 BRANCH        := $(shell git rev-parse --abbrev-ref HEAD)
 TAG           := $(shell git describe --tags --abbrev=0)
-DOCKER_LABEL  := mwb/es-all-in-one
-DOCKER_TAG    := 0.1.0
+DOCKER_LABEL  := beshultd/ror_enterprise
+DOCKER_TAG    := $(shell curl -s "https://raw.githubusercontent.com/sscarduzio/elasticsearch-readonlyrest-plugin/master/gradle.properties" | grep publi| cut -c24-99)
 
 # colours
 ccblack=$(shell echo -e "\033[0;30m")
@@ -19,15 +19,18 @@ ccend=$(shell echo -e "\033[0m")
 
 ##@ Docker
 build:	## build the container
-	@docker build --rm --tag $(DOCKER_LABEL) $(CURDIR)
+	@docker build --rm --tag $(DOCKER_LABEL):$(DOCKER_TAG) $(CURDIR)
 
 shell: build	## get a shell in the container
 	@docker run --rm -ti -v $(CURDIR):/code -p 9200:9200 -p 5601:5601 $(DOCKER_LABEL) bash
 
-run: build	## run es-all-in-one
+run: build	## run the container
 	@docker run --rm --init --name $(PROJECT_NAME) -ti -p 9200:9200 -p 5601:5601 $(DOCKER_LABEL)
 
-attach: ## Attach
+push: build	##  tag and push
+	@docker push  $(DOCKER_LABEL)
+
+attach: ## Attach to container shell
 	@docker exec -ti ${PROJECT_NAME} bash
 
 stop: ## get a shell in the container
