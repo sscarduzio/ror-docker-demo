@@ -25,7 +25,7 @@ shell: build	## get a shell in the container
 	@docker run --rm -ti -v $(CURDIR):/code -p 9200:9200 -p 5601:5601 $(DOCKER_LABEL) bash
 
 run: build	## run the container
-	@docker run --rm --init --name $(PROJECT_NAME) -ti -p 9200:9200 -p 5601:5601 $(DOCKER_LABEL)
+	@docker run --rm --init --name $(PROJECT_NAME) -ti -p 9200:9200 -p 5601:5601 $(DOCKER_LABEL):$(DOCKER_TAG)
 
 push: build	##  tag and push
 	@docker push  $(DOCKER_LABEL)
