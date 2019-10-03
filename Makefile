@@ -19,13 +19,14 @@ ccend=$(shell echo -e "\033[0m")
 
 ##@ Docker
 build:	## build the container
-	@docker build --rm --tag $(DOCKER_LABEL):$(DOCKER_TAG) $(CURDIR)
+	@docker build --rm --tag $(DOCKER_LABEL) $(CURDIR)
 
 shell: build	## get a shell in the container
 	@docker run --rm -ti -v $(CURDIR):/code -p 9200:9200 -p 5601:5601 $(DOCKER_LABEL) bash
 
 run: build	## run the container
-	@docker run --rm --init --name $(PROJECT_NAME) -ti -p 9200:9200 -p 5601:5601 $(DOCKER_LABEL)
+	@sysctl -w vm.max_map_count=300000 || echo  "$(ccmagenta)>>>IMPORTANT<<<< ------ When  in Linux, don't forget to run sysctl -w vm.max_map_count=300000 as root! --------$(ccend)" 
+	@docker run --ulimit nofile=300000:300000 --rm --init --name $(PROJECT_NAME) -ti -p 9200:9200 -p 5601:5601 $(DOCKER_LABEL)
 
 push: build	##  tag and push
 	@docker push  $(DOCKER_LABEL)
