@@ -139,7 +139,8 @@ RUN echo \
 "autostart=true\n"\
 "autorestart=true\n"\
 "environment=ES_HEAP_SIZE=2g\n"\
-"stdout_logfile=/var/log/supervisor/elasticsearch.out.log\n"\
+"stdout_logfile=/dev/stdout\n"\
+"stdout_logfile_maxbytes=0\n"\
 "stderr_logfile=/var/log/supervisor/elasticsearch.err.log\n"\
 > /etc/supervisor/conf.d/elasticsearch.conf
 
@@ -151,7 +152,8 @@ RUN echo \
 "autostart=true\n"\
 "autorestart=true\n"\
 "#environment=ES_HEAP_SIZE=2g\n"\
-"stdout_logfile=/var/log/supervisor/kibana.out.log\n"\
+"stdout_logfile=/dev/stdout\n"\
+"stdout_logfile_maxbytes=0\n"\
 "stderr_logfile=/var/log/supervisor/kibana.err.log\n"\
 > /etc/supervisor/conf.d/kibana.conf
 
