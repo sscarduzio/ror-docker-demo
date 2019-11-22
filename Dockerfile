@@ -58,11 +58,11 @@ PUBLISHED_ROR_VERSION=$(curl -s "https://raw.githubusercontent.com/sscarduzio/el
 && echo "ror published version is: ${PUBLISHED_ROR_VERSION} :)" 
 
 RUN KBN_ROR_VERSION=$(cat /tmp/published_ror_version) && echo "ror kbn version $KBN_ROR_VERSION" && \
-/usr/share/kibana/bin/kibana-plugin  --allow-root  install "https://m0ppfybs81.execute-api.eu-west-1.amazonaws.com/dev/download/trial?esVersion=${ES_VERSION}&pluginVersion=${KBN_ROR_VERSION}"
+/usr/share/kibana/bin/kibana-plugin  --allow-root  install "https://dobk8nrt1i.execute-api.eu-west-1.amazonaws.com/dev/download/trial?esVersion=${ES_VERSION}&pluginVersion=${KBN_ROR_VERSION}"
 
 
 RUN ES_ROR_VERSION=$(cat /tmp/published_ror_version) && echo "ror ES version $KBN_ROR_VERSION" &&\
-/usr/share/elasticsearch/bin/elasticsearch-plugin install -b "https://m0ppfybs81.execute-api.eu-west-1.amazonaws.com/dev/download/es?esVersion=${ES_VERSION}&pluginVersion=${ES_ROR_VERSION}"
+/usr/share/elasticsearch/bin/elasticsearch-plugin install -b "https://dobk8nrt1i.execute-api.eu-west-1.amazonaws.com/dev/download/es?esVersion=${ES_VERSION}&pluginVersion=${ES_ROR_VERSION}"
 
 # Configure Kibana
 RUN echo \
