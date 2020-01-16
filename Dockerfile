@@ -34,7 +34,7 @@ RUN wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | apt-key add 
 ####################
 
 ENV ES_MAJOR_VERSION=7.x
-ENV ES_VERSION=7.5.0
+ENV ES_VERSION=7.5.1
 
 # Add the elasticsearch apt repo
 RUN echo "deb https://artifacts.elastic.co/packages/${ES_MAJOR_VERSION}/apt stable main" | tee -a /etc/apt/sources.list.d/elastic-${ES_MAJOR_VERSION}.list
