@@ -52,17 +52,9 @@ RUN apt-get update && apt-get install -y kibana=${ES_VERSION}
 ### Install RoR Plugins
 #######################
 
-RUN \
-PUBLISHED_ROR_VERSION=$(curl -s "https://raw.githubusercontent.com/sscarduzio/elasticsearch-readonlyrest-plugin/master/gradle.properties" | grep publi|  awk -F= {'print $2'}) \
-&& echo $PUBLISHED_ROR_VERSION > /tmp/published_ror_version \
-&& echo "ror published version is: ${PUBLISHED_ROR_VERSION} :)" 
+RUN /usr/share/kibana/bin/kibana-plugin  --allow-root  install "https://api.beshu.tech/download/trial?esVersion=${ES_VERSION}"
 
-RUN KBN_ROR_VERSION=$(cat /tmp/published_ror_version) && echo "ror kbn version $KBN_ROR_VERSION" && \
-/usr/share/kibana/bin/kibana-plugin  --allow-root  install "https://api.beshu.tech/download/trial?esVersion=${ES_VERSION}&pluginVersion=${KBN_ROR_VERSION}"
-
-
-RUN ES_ROR_VERSION=$(cat /tmp/published_ror_version) && echo "ror ES version $KBN_ROR_VERSION" &&\
-/usr/share/elasticsearch/bin/elasticsearch-plugin install -b "https://api.beshu.tech/download/es?esVersion=${ES_VERSION}&pluginVersion=${ES_ROR_VERSION}"
+RUN  /usr/share/elasticsearch/bin/elasticsearch-plugin install -b "https://api.beshu.tech/download/es?esVersion=${ES_VERSION}"
 
 # Configure Kibana
 RUN echo \
