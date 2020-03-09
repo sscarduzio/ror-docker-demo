@@ -1,6 +1,6 @@
-# ElasticStack all-on-one
+# ElasticStack all-on-one container with ReadonlyREST Enterprise 
 
-This project is designed to install ElasticSearch, Kibana, Filebeat and ReadonlyRest
+This project is designed to install ElasticSearch, Kibana and ReadonlyREST Enterprise trial edition.
 
 ## First steps
 
@@ -30,3 +30,6 @@ Helpers
   cloc             Show Lines of Code analysis
   help             Display this help
 ```
+
+## Credits
+This project is based on the great work of Greg Trahair 
