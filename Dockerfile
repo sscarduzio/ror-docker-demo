@@ -19,6 +19,7 @@ RUN  apt-get install --fix-missing -y && apt-get install -y \
         openjdk-8-jre-headless \
         supervisor \
         vim \
+        nano \
         wget
 
 # Refresh Java CA certs
@@ -28,13 +29,12 @@ RUN /var/lib/dpkg/info/ca-certificates-java.postinst configure
 RUN wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | apt-key add -
 
 
-
 ####################
 ### ELK installation
 ####################
 
 ENV ES_MAJOR_VERSION=7.x
-ENV ES_VERSION=7.5.1
+ENV ES_VERSION=7.6.1
 
 # Add the elasticsearch apt repo
 RUN echo "deb https://artifacts.elastic.co/packages/${ES_MAJOR_VERSION}/apt stable main" | tee -a /etc/apt/sources.list.d/elastic-${ES_MAJOR_VERSION}.list
@@ -51,10 +51,11 @@ RUN apt-get update && apt-get install -y kibana=${ES_VERSION}
 #######################
 ### Install RoR Plugins
 #######################
+WORKDIR /usr/share/kibana
+RUN bin/kibana-plugin --allow-root install "https://api.beshu.tech/download/trial?esVersion=${ES_VERSION}"
 
-RUN /usr/share/kibana/bin/kibana-plugin  --allow-root  install "https://api.beshu.tech/download/trial?esVersion=${ES_VERSION}"
-
-RUN  /usr/share/elasticsearch/bin/elasticsearch-plugin install -b "https://api.beshu.tech/download/es?esVersion=${ES_VERSION}"
+WORKDIR /usr/share/elasticsearch
+RUN  bin/elasticsearch-plugin install -b "https://api.beshu.tech/download/es?esVersion=${ES_VERSION}"
 
 # Configure Kibana
 RUN echo \
@@ -82,6 +83,7 @@ RUN echo \
 "network.host: _local_,_site_\n"\
 "xpack.security.enabled: false\n"\
 > /etc/elasticsearch/elasticsearch.yml
+
 
 # RoR configuration
 RUN echo \
