@@ -8,7 +8,7 @@ This project is designed to install ElasticSearch, Kibana and ReadonlyREST Enter
 make run
 ```
 
-Open your browser to http://localhost:5601 and login with admin:admin.
+Open your browser to http://localhost:5601 and login with admin:passwd.
 
 ## Makefile targets
 
