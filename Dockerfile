@@ -1,4 +1,4 @@
-FROM ubuntu:19.04
+FROM ubuntu:20.04
 
 ################
 ### Preparing OS
@@ -34,7 +34,7 @@ RUN wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | apt-key add 
 ####################
 
 ENV ES_MAJOR_VERSION=7.x
-ENV ES_VERSION=7.6.1
+ENV ES_VERSION=7.6.2
 
 # Add the elasticsearch apt repo
 RUN echo "deb https://artifacts.elastic.co/packages/${ES_MAJOR_VERSION}/apt stable main" | tee -a /etc/apt/sources.list.d/elastic-${ES_MAJOR_VERSION}.list
