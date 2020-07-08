@@ -34,7 +34,7 @@ RUN wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | apt-key add 
 ####################
 
 ENV ES_MAJOR_VERSION=7.x
-ENV ES_VERSION=7.7.0
+ENV ES_VERSION=7.8.0
 
 # Add the elasticsearch apt repo
 RUN echo "deb https://artifacts.elastic.co/packages/${ES_MAJOR_VERSION}/apt stable main" | tee -a /etc/apt/sources.list.d/elastic-${ES_MAJOR_VERSION}.list
@@ -68,6 +68,7 @@ RUN echo \
 "readonlyrest_kbn.logLevel: 'debug'\n"\
 > /etc/kibana/kibana.yml
 
+RUN  ln -s /etc/kibana /usr/share/kibana/config
 RUN /usr/share/kibana/bin/kibana --allow-root --optimize 
 
 # Speed up the optimisation
