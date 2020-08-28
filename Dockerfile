@@ -33,8 +33,8 @@ RUN wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | apt-key add 
 ### ELK installation
 ####################
 
-ENV ES_MAJOR_VERSION=7.x
-ENV ES_VERSION=7.8.0
+ENV ES_MAJOR_VERSION=6.x
+ENV ES_VERSION=6.8.6
 
 # Add the elasticsearch apt repo
 RUN echo "deb https://artifacts.elastic.co/packages/${ES_MAJOR_VERSION}/apt stable main" | tee -a /etc/apt/sources.list.d/elastic-${ES_MAJOR_VERSION}.list
@@ -69,15 +69,16 @@ RUN echo \
 > /etc/kibana/kibana.yml
 
 RUN  ln -s /etc/kibana /usr/share/kibana/config
-RUN /usr/share/kibana/bin/kibana --allow-root --optimize 
+#RUN /usr/share/kibana/bin/kibana --allow-root --optimize 
 
 # Speed up the optimisation
 RUN touch /usr/share/kibana/optimize/bundles/readonlyrest_kbn.style.css
 
+RUN chown -R kibana /usr/share/kibana
+
 # Configure Elasticsearch
 RUN echo \
 "node.name: n1_it\n"\
-"cluster.initial_master_nodes: n1_it\n"\
 "cluster.name: es-all-in-one\n"\
 "path.data: /var/lib/elasticsearch\n"\
 "path.logs: /var/log/elasticsearch\n"\
@@ -153,7 +154,7 @@ RUN echo \
 > /etc/supervisor/conf.d/kibana.conf
 
 
-RUN mkdir /var/run/elasticsearch &&  chown -R elasticsearch /var/run/elasticsearch
+RUN chown -R elasticsearch /var/run/elasticsearch
 
 # Open Elasticsearch and Kibana ports
 EXPOSE 9200 5601
