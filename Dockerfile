@@ -51,11 +51,12 @@ RUN apt-get update && apt-get install -y kibana=${ES_VERSION}
 #######################
 ### Install RoR Plugins
 #######################
-WORKDIR /usr/share/kibana
-RUN bin/kibana-plugin --allow-root install "https://api.beshu.tech/download/trial?esVersion=${ES_VERSION}"
 
 WORKDIR /usr/share/elasticsearch
 RUN  bin/elasticsearch-plugin install -b "https://api.beshu.tech/download/es?esVersion=${ES_VERSION}"
+
+WORKDIR /usr/share/kibana
+RUN bin/kibana-plugin --allow-root install "https://api.beshu.tech/download/trial?esVersion=${ES_VERSION}"
 
 # Configure Kibana
 RUN echo \
