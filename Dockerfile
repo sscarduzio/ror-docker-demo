@@ -34,16 +34,19 @@ RUN wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | apt-key add 
 ####################
 
 ENV ES_MAJOR_VERSION=7.x
-ENV ES_VERSION=7.8.0
+ENV ES_VERSION=7.9.1
 
 # Add the elasticsearch apt repo
 RUN echo "deb https://artifacts.elastic.co/packages/${ES_MAJOR_VERSION}/apt stable main" | tee -a /etc/apt/sources.list.d/elastic-${ES_MAJOR_VERSION}.list
+#RUN echo "deb https://artifacts.elastic.co/packages/oss-7.x/apt stable main" | tee -a /etc/apt/sources.list.d/elastic-7.x.list
 
 
 # Install Elasticsearch
+#RUN apt-get update && apt-get install -y elasticsearch-oss=${ES_VERSION}
 RUN apt-get update && apt-get install -y elasticsearch=${ES_VERSION}
 
 # Install Kibana
+#RUN apt-get update && apt-get install -y kibana-oss=${ES_VERSION}
 RUN apt-get update && apt-get install -y kibana=${ES_VERSION}
 
 
@@ -56,7 +59,8 @@ WORKDIR /usr/share/elasticsearch
 RUN  bin/elasticsearch-plugin install -b "https://api.beshu.tech/download/es?esVersion=${ES_VERSION}"
 
 WORKDIR /usr/share/kibana
-RUN bin/kibana-plugin --allow-root install "https://api.beshu.tech/download/trial?esVersion=${ES_VERSION}"
+RUN bin/kibana-plugin --allow-root install "http://192.168.1.65:5000/readonlyrest_kbn_enterprise-1.20.1-pre5_es7.9.1.zip" 
+#"https://api.beshu.tech/download/trial?esVersion=${ES_VERSION}"
 
 # Configure Kibana
 RUN echo \
@@ -153,6 +157,7 @@ RUN echo \
 "stderr_logfile=/var/log/supervisor/kibana.err.log\n"\
 > /etc/supervisor/conf.d/kibana.conf
 
+RUN /usr/share/kibana/node/bin/node /usr/share/kibana/plugins/readonlyrest_kbn/ror-tools.js patch
 
 RUN mkdir /var/run/elasticsearch &&  chown -R elasticsearch /var/run/elasticsearch
 
