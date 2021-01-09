@@ -59,7 +59,7 @@ WORKDIR /usr/share/elasticsearch
 RUN  bin/elasticsearch-plugin install -b "https://api.beshu.tech/download/es?esVersion=${ES_VERSION}"
 
 WORKDIR /usr/share/kibana
-RUN bin/kibana-plugin --allow-root install "http://192.168.1.65:5000/readonlyrest_kbn_enterprise-1.20.1-pre5_es7.9.1.zip" 
+RUN bin/kibana-plugin --allow-root install "http://192.168.1.65:5000/readonlyrest_kbn_enterprise-1.26.0-np-pre1_es7.9.1.zip" 
 #"https://api.beshu.tech/download/trial?esVersion=${ES_VERSION}"
 
 # Configure Kibana
