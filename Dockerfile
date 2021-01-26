@@ -34,20 +34,20 @@ RUN wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | apt-key add 
 ####################
 
 ENV ES_MAJOR_VERSION=7.x
-ENV ES_VERSION=7.9.1
+ENV ES_VERSION=7.9.3
 
 # Add the elasticsearch apt repo
-RUN echo "deb https://artifacts.elastic.co/packages/${ES_MAJOR_VERSION}/apt stable main" | tee -a /etc/apt/sources.list.d/elastic-${ES_MAJOR_VERSION}.list
-#RUN echo "deb https://artifacts.elastic.co/packages/oss-7.x/apt stable main" | tee -a /etc/apt/sources.list.d/elastic-7.x.list
+#RUN echo "deb https://artifacts.elastic.co/packages/${ES_MAJOR_VERSION}/apt stable main" | tee -a /etc/apt/sources.list.d/elastic-${ES_MAJOR_VERSION}.list
+RUN echo "deb https://artifacts.elastic.co/packages/oss-7.x/apt stable main" | tee -a /etc/apt/sources.list.d/elastic-7.x.list
 
 
 # Install Elasticsearch
-#RUN apt-get update && apt-get install -y elasticsearch-oss=${ES_VERSION}
-RUN apt-get update && apt-get install -y elasticsearch=${ES_VERSION}
+#RUN apt-get update && apt-get install -y elasticsearch=${ES_VERSION}
+RUN apt-get update && apt-cache search elasticsearch && apt-get install -y elasticsearch-oss=${ES_VERSION}
 
 # Install Kibana
-#RUN apt-get update && apt-get install -y kibana-oss=${ES_VERSION}
-RUN apt-get update && apt-get install -y kibana=${ES_VERSION}
+RUN apt-get update && apt-get install -y kibana-oss=${ES_VERSION}
+#RUN apt-get update && apt-get install -y kibana=${ES_VERSION}
 
 
 
@@ -59,7 +59,7 @@ WORKDIR /usr/share/elasticsearch
 RUN  bin/elasticsearch-plugin install -b "https://api.beshu.tech/download/es?esVersion=${ES_VERSION}"
 
 WORKDIR /usr/share/kibana
-RUN bin/kibana-plugin --allow-root install "http://192.168.1.65:5000/readonlyrest_kbn_enterprise-1.26.0-np-pre1_es7.9.1.zip" 
+RUN bin/kibana-plugin --allow-root install "http://192.168.1.65:5000/readonlyrest_kbn_enterprise-1.26.0-np-pre7_es7.9.3.zip?q=w"
 #"https://api.beshu.tech/download/trial?esVersion=${ES_VERSION}"
 
 # Configure Kibana
@@ -68,13 +68,18 @@ RUN echo \
 "logging.json: false\n"\
 "elasticsearch.username: kibana\n"\
 "elasticsearch.password: kibana\n"\
-"xpack.security.enabled: false\n"\
-"readonlyrest_kbn.cookiePass: '12345678901234567890123456789012'\n"\
-"readonlyrest_kbn.logLevel: 'debug'\n"\
+#"xpack.security.enabled: false\n"\
+"readonlyrest_kbn: \n"\
+"  cookiePass: '12345678901234567890123456789012'\n"\
+"  logLevel: 'trace'\n"\
+"  whitelistedPaths: [".*/api/status$"]\n"\
+"  clearSessionOnEvents: ["login"]\n"\
+"  sessions_probe_interval_seconds: 300\n"\
+"  store_sessions_in_index: true\n"\
+"  auth:\n"\
 > /etc/kibana/kibana.yml
 
 RUN  ln -s /etc/kibana /usr/share/kibana/config
-RUN /usr/share/kibana/bin/kibana --allow-root --optimize 
 
 # Speed up the optimisation
 RUN touch /usr/share/kibana/optimize/bundles/readonlyrest_kbn.style.css
@@ -87,7 +92,7 @@ RUN echo \
 "path.data: /var/lib/elasticsearch\n"\
 "path.logs: /var/log/elasticsearch\n"\
 "network.host: _local_,_site_\n"\
-"xpack.security.enabled: false\n"\
+#"xpack.security.enabled: false\n"\
 > /etc/elasticsearch/elasticsearch.yml
 
 
@@ -158,6 +163,7 @@ RUN echo \
 > /etc/supervisor/conf.d/kibana.conf
 
 RUN /usr/share/kibana/node/bin/node /usr/share/kibana/plugins/readonlyrest_kbn/ror-tools.js patch
+RUN /usr/share/kibana/bin/kibana --allow-root  --optimize
 
 RUN mkdir /var/run/elasticsearch &&  chown -R elasticsearch /var/run/elasticsearch
 
