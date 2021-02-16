@@ -37,17 +37,17 @@ ENV ES_MAJOR_VERSION=7.x
 ENV ES_VERSION=7.9.3
 
 # Add the elasticsearch apt repo
-#RUN echo "deb https://artifacts.elastic.co/packages/${ES_MAJOR_VERSION}/apt stable main" | tee -a /etc/apt/sources.list.d/elastic-${ES_MAJOR_VERSION}.list
-RUN echo "deb https://artifacts.elastic.co/packages/oss-7.x/apt stable main" | tee -a /etc/apt/sources.list.d/elastic-7.x.list
+RUN echo "deb https://artifacts.elastic.co/packages/${ES_MAJOR_VERSION}/apt stable main" | tee -a /etc/apt/sources.list.d/elastic-${ES_MAJOR_VERSION}.list
+#RUN echo "deb https://artifacts.elastic.co/packages/oss-7.x/apt stable main" | tee -a /etc/apt/sources.list.d/elastic-7.x.list
 
 
 # Install Elasticsearch
-#RUN apt-get update && apt-get install -y elasticsearch=${ES_VERSION}
-RUN apt-get update && apt-cache search elasticsearch && apt-get install -y elasticsearch-oss=${ES_VERSION}
+RUN apt-get update && apt-get install -y elasticsearch=${ES_VERSION}
+#RUN apt-get update && apt-cache search elasticsearch && apt-get install -y elasticsearch-oss=${ES_VERSION}
 
 # Install Kibana
-RUN apt-get update && apt-get install -y kibana-oss=${ES_VERSION}
-#RUN apt-get update && apt-get install -y kibana=${ES_VERSION}
+#RUN apt-get update && apt-get install -y kibana-oss=${ES_VERSION}
+RUN apt-get update && apt-get install -y kibana=${ES_VERSION}
 
 
 
