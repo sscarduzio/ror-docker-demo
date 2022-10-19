@@ -33,8 +33,8 @@ RUN wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | apt-key add 
 ### ELK installation
 ####################
 
-ENV ES_MAJOR_VERSION=7.x
-ENV ES_VERSION=7.8.1
+ENV ES_MAJOR_VERSION=8.x
+ENV ES_VERSION=8.4.3
 
 # Add the elasticsearch apt repo
 RUN echo "deb https://artifacts.elastic.co/packages/${ES_MAJOR_VERSION}/apt stable main" | tee -a /etc/apt/sources.list.d/elastic-${ES_MAJOR_VERSION}.list
@@ -54,26 +54,24 @@ RUN apt-get update && apt-get install -y kibana=${ES_VERSION}
 
 WORKDIR /usr/share/elasticsearch
 RUN  bin/elasticsearch-plugin install -b "https://api.beshu.tech/download/es?esVersion=${ES_VERSION}"
+RUN jdk/bin/java -jar plugins/readonlyrest/ror-tools.jar patch 
 
 WORKDIR /usr/share/kibana
-RUN bin/kibana-plugin --allow-root install "https://api.beshu.tech/download/trial?esVersion=${ES_VERSION}"
+RUN bin/kibana-plugin  install "https://api.beshu.tech/download/kbn?email=ror-docker-demo%40example.com&edition=kbn_universal&esVersion=${ES_VERSION}"
+RUN node/bin/node plugins/readonlyrestkbn/ror-tools.js patch
 
 # Configure Kibana
 RUN echo \
 "server.host: 0.0.0.0\n"\
-"logging.json: false\n"\
 "elasticsearch.username: kibana\n"\
 "elasticsearch.password: kibana\n"\
-"xpack.security.enabled: false\n"\
+"#xpack.security.enabled: false\n"\
 "readonlyrest_kbn.cookiePass: '12345678901234567890123456789012'\n"\
 "readonlyrest_kbn.logLevel: 'debug'\n"\
 > /etc/kibana/kibana.yml
 
 RUN  ln -s /etc/kibana /usr/share/kibana/config
-RUN /usr/share/kibana/bin/kibana --allow-root --optimize 
 
-# Speed up the optimisation
-RUN touch /usr/share/kibana/optimize/bundles/readonlyrest_kbn.style.css
 
 # Configure Elasticsearch
 RUN echo \
@@ -84,8 +82,16 @@ RUN echo \
 "path.logs: /var/log/elasticsearch\n"\
 "network.host: _local_,_site_\n"\
 "xpack.security.enabled: false\n"\
+"xpack.security.transport.ssl.enabled: false\n"\
+"xpack.security.http.ssl.enabled: false\n"\
+"#ingest.geoip.downloader.enabled: false\n"\
 > /etc/elasticsearch/elasticsearch.yml
 
+RUN echo \
+"-Xms256m\n"\
+"-Xmx256m\n"\
+"-Dcom.readonlyrest.settings.loading.delay=0\n"\
+>> /etc/elasticsearch/jvm.options
 
 # RoR configuration
 RUN echo \
@@ -100,7 +106,7 @@ RUN echo \
 "   - name: PERSONAL_GRP\n"\
 "     groups: [ Personal ]\n"\
 "     kibana_access: rw\n"\
-"     kibana_hide_apps: [readonlyrest_kbn, timelion]\n"\
+"     kibana_hide_apps: ["Security"]\n"\
 "     kibana_index: '.kibana_@{user}'\n"\
 "     verbosity: error\n"\
 "\n"\
@@ -112,9 +118,14 @@ RUN echo \
 "   - name: Infosec\n"\
 "     groups: [ Infosec ]\n"\
 "     kibana_access: rw\n"\
-"     kibana_hide_apps: [ readonlyrest_kbn, timelion]\n"\
+"     kibana_hide_apps: [ "Security" ]\n"\
 "     kibana_index: .kibana_infosec\n"\
 "     verbosity: error\n"\
+"\n"\
+"  impersonation:\n"\
+"  - impersonator: admin\n"\
+"    users: [ '*' ]\n"\
+"    auth_key: admin:passwd\n"\
 "\n"\
 "  # USERS TO GROUPS ############\n"\
 "  users:\n"\
